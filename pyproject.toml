@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cve-matcher"
+version = "0.1.0"
+description = "Offline CVE/vulnerability matching against a CycloneDX SBOM or npm/pip manifest, using a local OSV-schema export."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+cve-matcher = "cve_matcher.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["cve_matcher*"]

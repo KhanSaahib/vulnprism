@@ -1,0 +1,11 @@
+{
+  "id": "GHSA-example-exact",
+  "summary": "Exact-version-only advisory with no severity data",
+  "aliases": [],
+  "affected": [
+    {
+      "package": {"ecosystem": "npm", "name": "left-pad"},
+      "versions": ["1.3.0"]
+    }
+  ]
+}

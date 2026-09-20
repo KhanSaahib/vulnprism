@@ -1,0 +1,22 @@
+{
+  "id": "PYSEC-example-django",
+  "summary": "SQL injection in django before 3.1.13",
+  "aliases": ["CVE-2021-9999"],
+  "severity": [
+    {"type": "CVSS_V3", "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N"}
+  ],
+  "affected": [
+    {
+      "package": {"ecosystem": "PyPI", "name": "django"},
+      "ranges": [
+        {
+          "type": "ECOSYSTEM",
+          "events": [
+            {"introduced": "3.1.0"},
+            {"fixed": "3.1.13"}
+          ]
+        }
+      ]
+    }
+  ]
+}
