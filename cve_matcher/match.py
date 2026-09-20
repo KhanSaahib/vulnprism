@@ -20,22 +20,43 @@ def _normalize_name(name: str, ecosystem: str) -> str:
 def find_findings(components: list[Component], vulnerabilities: list[Vulnerability]) -> list[Finding]:
     findings: list[Finding] = []
     for component in components:
+        # Package names are not globally unique. Without an ecosystem, a
+        # same-named package from a different registry could create a false
+        # positive; callers can supply --ecosystem for ambiguous SBOMs.
+        if not component.ecosystem:
+            continue
         component_name = _normalize_name(component.name, component.ecosystem)
         for vuln in vulnerabilities:
             for package in vuln.affected:
-                if component.ecosystem and package.ecosystem != component.ecosystem:
+                if package.ecosystem.casefold() != component.ecosystem.casefold():
                     continue
                 if _normalize_name(package.name, package.ecosystem) != component_name:
                     continue
 
                 if component.version in package.versions:
-                    findings.append(Finding(component, vuln, matched_via="exact-version"))
+                    findings.append(
+                        Finding(
+                            component,
+                            vuln,
+                            matched_via="exact-version",
+                            fixed_versions=package.fixed_versions,
+                        )
+                    )
                     break
 
                 matched_range = False
                 for version_range in package.ranges:
+                    if version_range.range_type.upper() not in ("SEMVER", "ECOSYSTEM"):
+                        continue
                     if in_range(component.version, version_range.events):
-                        findings.append(Finding(component, vuln, matched_via="range"))
+                        findings.append(
+                            Finding(
+                                component,
+                                vuln,
+                                matched_via="range",
+                                fixed_versions=package.fixed_versions,
+                            )
+                        )
                         matched_range = True
                         break
                 if matched_range:
@@ -46,7 +67,7 @@ def find_findings(components: list[Component], vulnerabilities: list[Vulnerabili
 def nearest_fix(finding: Finding) -> str | None:
     """The lowest known fixed version that is still above the component's version, if any."""
     candidates = [
-        v for v in finding.vulnerability.fixed_versions if compare(v, finding.component.version) > 0
+        v for v in finding.fixed_versions if compare(v, finding.component.version) > 0
     ]
     if not candidates:
         return None

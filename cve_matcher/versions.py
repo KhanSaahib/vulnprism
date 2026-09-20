@@ -67,30 +67,18 @@ def compare(a: str, b: str) -> int:
 def in_range(target: str, events: tuple[tuple[str, str], ...]) -> bool:
     """Evaluate an OSV-style event list against ``target``.
 
-    ``events`` is a sequence of ``(kind, version)`` pairs where ``kind`` is
-    one of ``introduced`` / ``fixed`` / ``last_affected`` / ``limit``. This
-    follows the evaluation model described by the public OSV schema: find
-    the event with the greatest version that is still ``<= target``, and
-    that event's kind determines whether ``target`` is affected.
+    ``events`` is an ordered sequence of ``(kind, version)`` pairs where
+    ``kind`` is one of ``introduced`` / ``fixed`` / ``last_affected`` /
+    ``limit``. ``fixed`` and ``limit`` are exclusive upper bounds, while
+    ``last_affected`` is inclusive.
     """
-    applicable = [
-        (kind, version)
-        for kind, version in events
-        if kind in ("introduced", "fixed", "last_affected")
-        and compare(version, target) <= 0
-    ]
-    if not applicable:
-        return False
-
-    def sort_key(item: tuple[str, str]) -> tuple[int, ...]:
-        return _parse(item[1])[0]
-
-    applicable.sort(key=sort_key)
-    kind, version = applicable[-1]
-    if kind == "introduced":
-        return True
-    if kind == "fixed":
-        return False
-    if kind == "last_affected":
-        return compare(target, version) == 0
-    return False
+    affected = False
+    for kind, version in events:
+        relation = compare(target, version)
+        if kind == "introduced" and (version == "0" or relation >= 0):
+            affected = True
+        elif kind in ("fixed", "limit") and relation >= 0:
+            affected = False
+        elif kind == "last_affected" and relation > 0:
+            affected = False
+    return affected

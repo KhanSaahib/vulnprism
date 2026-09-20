@@ -1,5 +1,9 @@
 # cve-matcher
 
+[![CI](https://github.com/KhanSaahib/cve-matcher/actions/workflows/ci.yml/badge.svg)](https://github.com/KhanSaahib/cve-matcher/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 Static hardening scanners (the kind this author's `blue-forge` repo is full
 of - `depguard`, `iacguard`, `k8sguard`, `dockerguard`) catch *misconfigured*
 dependencies: typosquats, unpinned versions, missing lockfiles. None of them
@@ -33,7 +37,7 @@ they report on different, non-overlapping risks.
 No dependencies beyond the Python 3.10+ standard library.
 
 ```bash
-git clone <this repo>
+git clone https://github.com/KhanSaahib/cve-matcher.git
 cd cve-matcher
 python3 -m pytest tests/ -q   # optional: run the test suite
 ```
@@ -128,6 +132,9 @@ exactly which of the three applied - never hidden, per this project's
   already lists.** An SBOM generator (Syft, `cyclonedx-npm`, `cyclonedx-py`)
   is expected to have already flattened the dependency tree; `cve-matcher`
   only reads what's in the file.
+- **SBOM components need an ecosystem.** Components without a recognized purl
+  are skipped to avoid matching a same-named package from the wrong registry;
+  use `--ecosystem` when the entire SBOM belongs to one ecosystem.
 - **No network access, ever** - the OSV export's freshness is entirely the
   operator's responsibility, same as `certwatch`'s CT log export in
   `blue-forge`.

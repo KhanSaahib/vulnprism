@@ -30,3 +30,10 @@ def test_in_range_last_affected_is_inclusive():
     events = (("introduced", "0"), ("last_affected", "1.2.0"))
     assert in_range("1.2.0", events) is True
     assert in_range("1.2.1", events) is False
+
+
+def test_in_range_limit_is_exclusive():
+    events = (("introduced", "1.0.0"), ("limit", "2.0.0"))
+    assert in_range("1.9.9", events) is True
+    assert in_range("2.0.0", events) is False
+    assert in_range("2.1.0", events) is False

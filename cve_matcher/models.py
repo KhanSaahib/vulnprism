@@ -28,6 +28,7 @@ class AffectedPackage:
     name: str
     versions: tuple[str, ...] = field(default_factory=tuple)
     ranges: tuple[VersionRange, ...] = field(default_factory=tuple)
+    fixed_versions: tuple[str, ...] = field(default_factory=tuple)
 
 
 @dataclass(frozen=True)
@@ -49,6 +50,7 @@ class Finding:
     component: Component
     vulnerability: Vulnerability
     matched_via: str  # "exact-version" or "range"
+    fixed_versions: tuple[str, ...] = field(default_factory=tuple)
 
     @property
     def score(self) -> float:

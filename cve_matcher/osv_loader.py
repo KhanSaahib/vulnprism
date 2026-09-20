@@ -26,6 +26,17 @@ def _parse_range(range_obj: dict) -> VersionRange:
     return VersionRange(range_type=range_obj.get("type", "ECOSYSTEM"), events=events)
 
 
+def _range_fixed_versions(ranges: tuple[VersionRange, ...]) -> tuple[str, ...]:
+    return tuple(
+        dict.fromkeys(
+            version
+            for version_range in ranges
+            for kind, version in version_range.events
+            if kind == "fixed"
+        )
+    )
+
+
 def _parse_affected(record: dict) -> tuple[AffectedPackage, ...]:
     affected: list[AffectedPackage] = []
     for entry in record.get("affected", []):
@@ -37,7 +48,13 @@ def _parse_affected(record: dict) -> tuple[AffectedPackage, ...]:
         versions = tuple(str(v) for v in entry.get("versions", []))
         ranges = tuple(_parse_range(r) for r in entry.get("ranges", []))
         affected.append(
-            AffectedPackage(ecosystem=ecosystem, name=name, versions=versions, ranges=ranges)
+            AffectedPackage(
+                ecosystem=ecosystem,
+                name=name,
+                versions=versions,
+                ranges=ranges,
+                fixed_versions=_range_fixed_versions(ranges),
+            )
         )
     return tuple(affected)
 
@@ -76,8 +93,8 @@ def parse_record(record: dict) -> Vulnerability | None:
 def _iter_records(path: Path) -> list[dict]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, UnicodeDecodeError, OSError):
-        return []
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as exc:
+        raise ValueError(f"could not read OSV JSON {path}: {exc}") from exc
     if isinstance(data, list):
         return [r for r in data if isinstance(r, dict)]
     if isinstance(data, dict) and isinstance(data.get("vulns"), list):
@@ -87,15 +104,22 @@ def _iter_records(path: Path) -> list[dict]:
     return []
 
 
-def load_osv_db(paths: list[str]) -> list[Vulnerability]:
+def load_osv_db(paths: list[str | Path]) -> list[Vulnerability]:
     """Load every OSV JSON record found under the given files/directories."""
     vulnerabilities: list[Vulnerability] = []
     for raw_path in paths:
         p = Path(raw_path)
+        if not p.exists():
+            raise FileNotFoundError(f"OSV database path not found: {p}")
         files = sorted(p.rglob("*.json")) if p.is_dir() else [p]
+        if not files:
+            raise ValueError(f"no JSON files found under OSV database path: {p}")
         for file_path in files:
             for record in _iter_records(file_path):
-                vuln = parse_record(record)
+                try:
+                    vuln = parse_record(record)
+                except (AttributeError, TypeError, ValueError) as exc:
+                    raise ValueError(f"invalid OSV record in {file_path}: {exc}") from exc
                 if vuln is not None:
                     vulnerabilities.append(vuln)
     return vulnerabilities

@@ -1,7 +1,11 @@
 __pycache__/
-*.pyc
+*.py[cod]
+.coverage
 .pytest_cache/
+.pytest-tmp/
 dist/
 build/
 *.egg-info/
 .venv/
+cve_report.json
+cve_report.md

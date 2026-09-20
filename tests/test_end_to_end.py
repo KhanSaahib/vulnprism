@@ -2,6 +2,7 @@ from pathlib import Path
 
 from cve_matcher.manifest_loader import load_cyclonedx_sbom, load_pip_requirements
 from cve_matcher.match import find_findings, nearest_fix
+from cve_matcher.models import AffectedPackage, Component, VersionRange, Vulnerability
 from cve_matcher.osv_loader import load_osv_db
 from cve_matcher.report import to_json, to_markdown
 
@@ -46,3 +47,66 @@ def test_reports_render_without_error():
 
 def test_empty_findings_render_clean_report():
     assert "No known vulnerabilities" in to_markdown([])
+
+
+def test_unknown_ecosystem_does_not_cross_match_registry():
+    component = Component("shared-name", "1.0.0", "", "sbom")
+    vulnerability = Vulnerability(
+        id="TEST-1",
+        summary="",
+        aliases=(),
+        severity_score=50,
+        severity_label="MEDIUM",
+        severity_basis="test",
+        affected=(AffectedPackage("npm", "shared-name", versions=("1.0.0",)),),
+    )
+    assert find_findings([component], [vulnerability]) == []
+
+
+def test_git_ranges_are_not_compared_as_package_versions():
+    component = Component("pkg", "2.0.0", "npm", "sbom")
+    vulnerability = Vulnerability(
+        id="TEST-2",
+        summary="",
+        aliases=(),
+        severity_score=50,
+        severity_label="MEDIUM",
+        severity_basis="test",
+        affected=(
+            AffectedPackage(
+                "npm",
+                "pkg",
+                ranges=(VersionRange("GIT", (("introduced", "deadbeef"),)),),
+            ),
+        ),
+    )
+    assert find_findings([component], [vulnerability]) == []
+
+
+def test_nearest_fix_is_scoped_to_matched_package():
+    component = Component("pkg", "1.5.0", "npm", "sbom")
+    vulnerability = Vulnerability(
+        id="TEST-3",
+        summary="",
+        aliases=(),
+        severity_score=50,
+        severity_label="MEDIUM",
+        severity_basis="test",
+        affected=(
+            AffectedPackage(
+                "npm",
+                "pkg",
+                ranges=(VersionRange("SEMVER", (("introduced", "0"), ("fixed", "2.0.0"))),),
+                fixed_versions=("2.0.0",),
+            ),
+            AffectedPackage(
+                "npm",
+                "other",
+                ranges=(VersionRange("SEMVER", (("introduced", "0"), ("fixed", "1.6.0"))),),
+                fixed_versions=("1.6.0",),
+            ),
+        ),
+        fixed_versions=("2.0.0", "1.6.0"),
+    )
+    finding = find_findings([component], [vulnerability])[0]
+    assert nearest_fix(finding) == "2.0.0"
