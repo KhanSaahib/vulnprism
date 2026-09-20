@@ -1,4 +1,4 @@
-from cve_matcher.versions import compare, in_range
+from vulnprism.versions import compare, in_range
 
 
 def test_compare_basic_numeric():

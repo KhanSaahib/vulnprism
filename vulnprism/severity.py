@@ -1,4 +1,4 @@
-"""Severity scoring on cve-matcher's own 0-100 scale.
+"""Severity scoring on VulnPrism's own 0-100 scale.
 
 OSV records carry severity two different ways: a plain label
 (``database_specific.severity``, e.g. GitHub Security Advisories) or a raw

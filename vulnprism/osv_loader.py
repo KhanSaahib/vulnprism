@@ -1,6 +1,6 @@
 """Loads a local export of OSV-schema vulnerability records.
 
-cve-matcher never calls the OSV.dev API itself - the operator brings an
+VulnPrism never calls the OSV.dev API itself - the operator brings an
 export (e.g. an extracted ``all.zip`` per-ecosystem dump, or a handful of
 records saved from ``https://api.osv.dev/v1/query`` responses), the same
 "bring your own offline export" convention blue-forge uses for certwatch's

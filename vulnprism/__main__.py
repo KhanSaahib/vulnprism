@@ -1,4 +1,4 @@
-"""CLI entry point: python -m cve_matcher ..."""
+"""CLI entry point: python -m vulnprism ..."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def _score(value: str) -> float:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="cve-matcher",
+        prog="vulnprism",
         description="Offline CVE/vulnerability matching against a CycloneDX SBOM or npm/pip manifest, "
         "using a local OSV-schema vulnerability export. No network access.",
     )

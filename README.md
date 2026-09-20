@@ -1,11 +1,11 @@
-# cve-matcher
+# VulnPrism
 
 <p align="center">
-  <img src="docs/assets/cve-matcher-social.png" alt="Software packages passing through a vulnerability scanner" width="100%">
+  <img src="docs/assets/vulnprism-social.png" alt="Software packages passing through a vulnerability scanner" width="100%">
 </p>
 
 <p align="center">
-  <a href="https://github.com/KhanSaahib/cve-matcher/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/KhanSaahib/cve-matcher/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/KhanSaahib/vulnprism/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/KhanSaahib/vulnprism/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://www.python.org/downloads/"><img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-2563eb.svg"></a>
   <img alt="Offline first" src="https://img.shields.io/badge/network-offline--first-0891b2.svg">
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-16a34a.svg"></a>
@@ -21,9 +21,9 @@
 </p>
 
 > [!TIP]
-> **Start here:** Run the fixture-backed [quick start](#quick-start). If it helps, [star this repo](https://github.com/KhanSaahib/cve-matcher) and [follow @KhanSaahib](https://github.com/KhanSaahib) for more practical blue-team tools.
+> **Start here:** Run the fixture-backed [quick start](#quick-start). If it helps, [star this repo](https://github.com/KhanSaahib/vulnprism) and [follow @KhanSaahib](https://github.com/KhanSaahib) for more practical blue-team tools.
 
-`cve-matcher` reads a CycloneDX SBOM, an npm `package-lock.json`, or a Python
+`VulnPrism` reads a CycloneDX SBOM, an npm `package-lock.json`, or a Python
 `requirements.txt`, and cross-references every resolved (name, version)
 against a local export of [OSV-schema](https://ossf.github.io/osv-schema/)
 vulnerability records - the interchange format used by OSV.dev, the GitHub
@@ -31,7 +31,7 @@ Advisory Database, and the PyPA Advisory Database. It makes **no network
 calls itself**: like `certwatch`'s CT-log export or `depguard`'s
 registry-free manifest scan, you bring the OSV export file(s) (e.g. an
 extracted per-ecosystem `all.zip` from OSV.dev, or a handful of saved
-`api.osv.dev` responses) and `cve-matcher` matches offline.
+`api.osv.dev` responses) and `VulnPrism` matches offline.
 
 - **Multiple inputs:** scan CycloneDX, npm lockfiles, and pinned Python requirements together.
 - **Explainable matches:** see the advisory, affected range, severity basis, and available fix.
@@ -42,10 +42,10 @@ extracted per-ecosystem `all.zip` from OSV.dev, or a handful of saved
 Try a real match with the repository's sample SBOM and local OSV records:
 
 ```bash
-git clone https://github.com/KhanSaahib/cve-matcher.git
-cd cve-matcher
+git clone https://github.com/KhanSaahib/vulnprism.git
+cd vulnprism
 python -m pip install -e .
-cve-matcher \
+vulnprism \
   --sbom tests/fixtures/sbom_sample.cdx.json \
   --osv-db tests/fixtures/osv_sample \
   --format markdown
@@ -69,7 +69,7 @@ flowchart LR
 
 `depguard` catches supply-chain *hygiene* problems (typosquats, unpinned
 versions, malicious install scripts) with no external data source needed.
-`cve-matcher` catches the complementary case: a dependency that is perfectly
+`VulnPrism` catches the complementary case: a dependency that is perfectly
 well-behaved and correctly pinned, but is a version with a CVE. Run both -
 they report on different, non-overlapping risks.
 
@@ -78,19 +78,19 @@ they report on different, non-overlapping risks.
 No dependencies beyond the Python 3.10+ standard library.
 
 ```bash
-git clone https://github.com/KhanSaahib/cve-matcher.git
-cd cve-matcher
+git clone https://github.com/KhanSaahib/vulnprism.git
+cd vulnprism
 python3 -m pytest tests/ -q   # optional: run the test suite
 ```
 
 Or build and install it as a package (dependency-free wheel, console script
-`cve-matcher`):
+`vulnprism`):
 
 ```bash
 python -m pip install build
-python -m build                          # -> dist/cve_matcher-*.whl
-python -m pip install --no-deps dist/cve_matcher-*.whl
-cve-matcher --help
+python -m build                          # -> dist/vulnprism-*.whl
+python -m pip install --no-deps dist/vulnprism-*.whl
+vulnprism --help
 ```
 
 ## Usage
@@ -101,7 +101,7 @@ cve-matcher --help
 #   unzip all.zip -d osv_data/npm
 # or save a handful of https://api.osv.dev/v1/query responses as .json files.
 
-python3 -m cve_matcher \
+python3 -m vulnprism \
   --sbom sbom.cdx.json \
   --npm-lockfile package-lock.json \
   --pip-requirements requirements.txt \
@@ -132,7 +132,7 @@ any finding remains after `--min-score` filtering, for CI gating.
 
 ## How matching works
 
-For each component, `cve-matcher` looks for an OSV record with an `affected`
+For each component, `VulnPrism` looks for an OSV record with an `affected`
 entry that shares its ecosystem and (normalized) package name, then checks
 either an exact `versions` list match or evaluates the record's version
 `ranges` against the component's version using the algorithm the OSV schema
@@ -140,15 +140,15 @@ itself describes: walk the `introduced`/`fixed`/`last_affected` events in
 increasing version order and take whichever event's version is the greatest
 one still `<=` the component's version - if that event is `introduced`, the
 version is affected; `fixed` or an exceeded `last_affected` means it is not.
-See `cve_matcher/versions.py`.
+See `vulnprism/versions.py`.
 
 ## Severity scoring
 
-`cve-matcher` reports severity on its own 0-100 scale, derived in priority
+`VulnPrism` reports severity on its own 0-100 scale, derived in priority
 order: (1) a plain `database_specific.severity` label if the OSV record has
 one (CRITICAL=95, HIGH=75, MEDIUM=50, LOW=20); (2) otherwise, a **heuristic
 approximation** from a CVSS v3/v4 vector string's own metric values
-(`cve_matcher/severity.py::vector_heuristic_score`) - explicitly *not* the
+(`vulnprism/severity.py::vector_heuristic_score`) - explicitly *not* the
 official CVSS base-score formula, since that requires the full
 impact/exploitability/scope-changed calculation; (3) otherwise `UNKNOWN` at a
 default of 40, so an unscored record is still visible in a report rather than
@@ -162,7 +162,7 @@ exactly which of the three applied - never hidden, per this project's
   it compares dotted numeric segments plus a single trailing pre-release tag
   and correctly ignores SemVer build metadata. PEP 440 epochs and
   ecosystem-specific pre-release ordering rules are not modeled. See
-  `cve_matcher/versions.py`.
+  `vulnprism/versions.py`.
 - **The CVSS vector heuristic is an approximation**, not an official CVSS
   base score - use it only to rank findings against each other, not as a
   substitute for a real CVSS calculator.
@@ -172,7 +172,7 @@ exactly which of the three applied - never hidden, per this project's
   need exact installed versions checked.
 - **No transitive dependency resolution beyond what the SBOM/lockfile
   already lists.** An SBOM generator (Syft, `cyclonedx-npm`, `cyclonedx-py`)
-  is expected to have already flattened the dependency tree; `cve-matcher`
+  is expected to have already flattened the dependency tree; `VulnPrism`
   only reads what's in the file.
 - **SBOM components need an ecosystem.** Components without a recognized purl
   are skipped to avoid matching a same-named package from the wrong registry;
@@ -184,7 +184,7 @@ exactly which of the three applied - never hidden, per this project's
 ## Project layout
 
 ```
-cve_matcher/
+vulnprism/
   models.py           # Component / Vulnerability / Finding dataclasses
   versions.py          # dependency-free version comparator + OSV range evaluator
   severity.py           # severity scoring (label-based + CVSS-vector heuristic)

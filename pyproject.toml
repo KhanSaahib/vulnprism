@@ -3,7 +3,7 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cve-matcher"
+name = "vulnprism"
 version = "0.1.0"
 description = "Offline CVE/vulnerability matching against a CycloneDX SBOM or npm/pip manifest, using a local OSV-schema export."
 readme = "README.md"
@@ -26,15 +26,15 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/KhanSaahib/cve-matcher"
-Issues = "https://github.com/KhanSaahib/cve-matcher/issues"
-Source = "https://github.com/KhanSaahib/cve-matcher"
+Homepage = "https://github.com/KhanSaahib/vulnprism"
+Issues = "https://github.com/KhanSaahib/vulnprism/issues"
+Source = "https://github.com/KhanSaahib/vulnprism"
 
 [project.scripts]
-cve-matcher = "cve_matcher.__main__:main"
+vulnprism = "vulnprism.__main__:main"
 
 [project.optional-dependencies]
 dev = ["build>=1.2", "pytest>=8"]
 
 [tool.setuptools.packages.find]
-include = ["cve_matcher*"]
+include = ["vulnprism*"]

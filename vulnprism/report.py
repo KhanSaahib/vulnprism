@@ -43,10 +43,10 @@ def to_json(findings: list[Finding]) -> str:
 
 def to_markdown(findings: list[Finding]) -> str:
     if not findings:
-        return "# cve-matcher report\n\nNo known vulnerabilities matched.\n"
+        return "# VulnPrism report\n\nNo known vulnerabilities matched.\n"
 
     lines = [
-        "# cve-matcher report",
+        "# VulnPrism report",
         "",
         f"{len(findings)} finding(s) across {len({f.component.name for f in findings})} component(s).",
         "",

@@ -1,6 +1,6 @@
 # Notice and attribution
 
-`cve-matcher` is 100% original code written for this repository. It contains
+`VulnPrism` is 100% original code written for this repository. It contains
 no code copied from any other project. This file records every public
 project, specification, or data source that informed its design, and exactly
 what was drawn from each.
@@ -17,8 +17,8 @@ what was drawn from each.
   `severity[].{type,score}`, `database_specific.severity`) and the publicly
   described range-evaluation model (walk sorted `introduced`/`fixed`/
   `last_affected` events to determine whether a version is inside a range).
-  No schema file, validator, or code was copied. `cve_matcher/osv_loader.py`
-  and `cve_matcher/versions.py` are original implementations against this
+  No schema file, validator, or code was copied. `vulnprism/osv_loader.py`
+  and `vulnprism/versions.py` are original implementations against this
   public interchange format, the same way `k8sguard` elsewhere in this
   author's `blue-forge` repo reads the public Kubernetes API field names.
 
@@ -28,7 +28,7 @@ what was drawn from each.
 - License: the OSV.dev database itself is aggregated from many upstream
   advisory sources (GHSA, PyPA Advisory Database, npm advisory data, etc.)
   each with its own license/terms; OSV.dev publishes its own data under
-  CC-BY-4.0. `cve-matcher` does not ship, bundle, or redistribute any OSV.dev
+  CC-BY-4.0. `VulnPrism` does not ship, bundle, or redistribute any OSV.dev
   data - it only reads a local export the operator supplies themselves, the
   same "bring your own offline export" convention this author's `certwatch`
   (Certificate Transparency export) and `depguard` (manifest, no registry
@@ -61,13 +61,13 @@ what was drawn from each.
   explicitly **not** the official CVSS base-score formula - it is a
   documented, simplified weighted-average approximation used only to rank
   findings relative to each other. See the docstring in
-  `cve_matcher/severity.py` for exactly what it does and does not compute.
+  `vulnprism/severity.py` for exactly what it does and does not compute.
 
 ## Prior art consulted for the general approach (no code or data used)
 
 - OSV-Scanner (Google, Apache-2.0) and Grype (Anchore, Apache-2.0) - the
   general idea of "match an SBOM/manifest against a vulnerability database
   offline." No code, rules, matching logic, or data from either project was
-  read, copied, or ported; `cve-matcher`'s version-range algorithm, severity
+  read, copied, or ported; `VulnPrism`'s version-range algorithm, severity
   heuristic, and manifest parsers were all written from scratch against the
   public specs cited above.

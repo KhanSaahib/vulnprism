@@ -1,4 +1,4 @@
-from cve_matcher.severity import resolve_severity, vector_heuristic_score
+from vulnprism.severity import resolve_severity, vector_heuristic_score
 
 
 def test_label_based_severity():

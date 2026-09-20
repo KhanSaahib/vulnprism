@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cve_matcher.__main__ import main
+from vulnprism.__main__ import main
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -26,4 +26,4 @@ def test_version(capsys):
         assert exc.code == 0
     else:
         raise AssertionError("expected SystemExit from argparse version action")
-    assert "cve-matcher 0.1.0" in capsys.readouterr().out
+    assert "vulnprism 0.1.0" in capsys.readouterr().out

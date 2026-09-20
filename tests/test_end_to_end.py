@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from cve_matcher.manifest_loader import load_cyclonedx_sbom, load_pip_requirements
-from cve_matcher.match import find_findings, nearest_fix
-from cve_matcher.models import AffectedPackage, Component, VersionRange, Vulnerability
-from cve_matcher.osv_loader import load_osv_db
-from cve_matcher.report import to_json, to_markdown
+from vulnprism.manifest_loader import load_cyclonedx_sbom, load_pip_requirements
+from vulnprism.match import find_findings, nearest_fix
+from vulnprism.models import AffectedPackage, Component, VersionRange, Vulnerability
+from vulnprism.osv_loader import load_osv_db
+from vulnprism.report import to_json, to_markdown
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

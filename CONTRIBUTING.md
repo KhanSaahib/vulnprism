@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve `cve-matcher`.
+Thanks for helping improve `VulnPrism`.
 
 ```bash
 python -m venv .venv

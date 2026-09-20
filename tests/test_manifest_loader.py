@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cve_matcher.manifest_loader import (
+from vulnprism.manifest_loader import (
     load_cyclonedx_sbom,
     load_npm_lockfile,
     load_pip_requirements,
