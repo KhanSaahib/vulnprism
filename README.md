@@ -1,18 +1,27 @@
 # cve-matcher
 
-[![CI](https://github.com/KhanSaahib/cve-matcher/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/KhanSaahib/cve-matcher/actions/workflows/ci.yml?query=branch%3Amain)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+<p align="center">
+  <img src="docs/assets/cve-matcher-social.png" alt="Software packages passing through a vulnerability scanner" width="100%">
+</p>
 
-Static hardening scanners (the kind this author's `blue-forge` repo is full
-of - `depguard`, `iacguard`, `k8sguard`, `dockerguard`) catch *misconfigured*
-dependencies: typosquats, unpinned versions, missing lockfiles. None of them
-answer the much more direct question: **is a package version I actually ship
-one with a publicly disclosed, known vulnerability?** `depguard`'s own README
-says as much - its "known-compromised" table is "a small, illustrative set of
-famous historical incidents, not a live threat feed" and explicitly suggests
-pairing it with OSV.dev, the GitHub Advisory Database, or a commercial feed
-"for real coverage." `cve-matcher` is that missing piece.
+<p align="center">
+  <a href="https://github.com/KhanSaahib/cve-matcher/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/KhanSaahib/cve-matcher/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://www.python.org/downloads/"><img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-2563eb.svg"></a>
+  <img alt="Offline first" src="https://img.shields.io/badge/network-offline--first-0891b2.svg">
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-16a34a.svg"></a>
+</p>
+
+<p align="center"><strong>Match what you ship against known vulnerabilities—locally, transparently, and offline.</strong></p>
+
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#usage">Usage</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+> [!TIP]
+> **Start here:** Run the fixture-backed [quick start](#quick-start). If it helps, [star this repo](https://github.com/KhanSaahib/cve-matcher) and [follow @KhanSaahib](https://github.com/KhanSaahib) for more practical blue-team tools.
 
 `cve-matcher` reads a CycloneDX SBOM, an npm `package-lock.json`, or a Python
 `requirements.txt`, and cross-references every resolved (name, version)
@@ -23,6 +32,38 @@ calls itself**: like `certwatch`'s CT-log export or `depguard`'s
 registry-free manifest scan, you bring the OSV export file(s) (e.g. an
 extracted per-ecosystem `all.zip` from OSV.dev, or a handful of saved
 `api.osv.dev` responses) and `cve-matcher` matches offline.
+
+- **Multiple inputs:** scan CycloneDX, npm lockfiles, and pinned Python requirements together.
+- **Explainable matches:** see the advisory, affected range, severity basis, and available fix.
+- **Pipeline friendly:** emit Markdown or versioned JSON and fail builds above your chosen threshold.
+
+## Quick start
+
+Try a real match with the repository's sample SBOM and local OSV records:
+
+```bash
+git clone https://github.com/KhanSaahib/cve-matcher.git
+cd cve-matcher
+python -m pip install -e .
+cve-matcher \
+  --sbom tests/fixtures/sbom_sample.cdx.json \
+  --osv-db tests/fixtures/osv_sample \
+  --format markdown
+```
+
+No data is uploaded. Replace the sample paths with your own SBOM or manifests
+and a current local OSV export.
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[SBOM or manifests] --> C[Package inventory]
+    B[Local OSV records] --> D[Version matcher]
+    C --> D
+    D --> E[Severity and fix context]
+    E --> F[Report or CI gate]
+```
 
 ## Why this over `depguard` alone
 
