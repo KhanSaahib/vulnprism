@@ -18,6 +18,14 @@ def test_vector_heuristic_returns_none_for_incomplete_vector():
     assert vector_heuristic_score("CVSS:3.1/AV:N/AC:L") is None
 
 
+def test_cvss_v4_vector_is_ranked():
+    score = vector_heuristic_score(
+        "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:L/SC:N/SI:N/SA:N"
+    )
+    assert score is not None
+    assert score >= 70
+
+
 def test_unknown_when_no_severity_data():
     score, label, basis = resolve_severity(None, [])
     assert label == "UNKNOWN"

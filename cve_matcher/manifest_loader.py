@@ -28,7 +28,10 @@ _PURL_ECOSYSTEM = {
 }
 
 _PURL_RE = re.compile(r"^pkg:([^/]+)/(.+)@([^?@]+)")
-_REQ_LINE_RE = re.compile(r"^\s*([A-Za-z0-9_.\-]+)\s*==\s*([A-Za-z0-9_.\-+]+)\s*(?:;.*)?$")
+_REQ_LINE_RE = re.compile(
+    r"^\s*([A-Za-z0-9_.\-]+)(?:\[[^\]]+\])?\s*==\s*"
+    r"([A-Za-z0-9_.\-+]+)\s*(?:;[^#]*)?(?:\s+#.*)?$"
+)
 
 
 def _purl_to_ecosystem(purl: str) -> str:
@@ -40,8 +43,15 @@ def _purl_to_ecosystem(purl: str) -> str:
 
 def load_cyclonedx_sbom(path: str, default_ecosystem: str = "") -> list[Component]:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"{path}: CycloneDX document root must be an object")
+    raw_components = data.get("components", [])
+    if not isinstance(raw_components, list):
+        raise ValueError(f"{path}: CycloneDX 'components' must be a list")
     components: list[Component] = []
-    for entry in data.get("components", []):
+    for entry in raw_components:
+        if not isinstance(entry, dict):
+            continue
         name = entry.get("name")
         version = entry.get("version")
         if not name or not version:
@@ -64,6 +74,8 @@ def _npm_name_from_path(pkg_path: str) -> str | None:
 def _walk_lockfile_v1_deps(deps: dict) -> list[Component]:
     components: list[Component] = []
     for name, info in deps.items():
+        if not isinstance(info, dict):
+            continue
         version = info.get("version")
         if version:
             components.append(
@@ -77,9 +89,13 @@ def _walk_lockfile_v1_deps(deps: dict) -> list[Component]:
 
 def load_npm_lockfile(path: str) -> list[Component]:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"{path}: npm lockfile root must be an object")
     if isinstance(data.get("packages"), dict):
         components: list[Component] = []
         for pkg_path, info in data["packages"].items():
+            if not isinstance(info, dict):
+                continue
             if pkg_path == "":
                 continue
             name = info.get("name") or _npm_name_from_path(pkg_path)

@@ -30,3 +30,27 @@ def test_load_pip_requirements_skips_unpinned():
     assert "Django" in names
     assert "requests" in names
     assert "flask" not in names  # unpinned (>=), skipped
+
+
+def test_load_pip_requirements_accepts_extras_markers_and_comments(tmp_path):
+    path = tmp_path / "requirements.txt"
+    path.write_text(
+        'requests[socks]==2.31.0 ; python_version >= "3.10" # pinned\n',
+        encoding="utf-8",
+    )
+    components = load_pip_requirements(str(path))
+    assert [(component.name, component.version) for component in components] == [
+        ("requests", "2.31.0")
+    ]
+
+
+def test_manifest_loaders_reject_non_object_roots(tmp_path):
+    bad = tmp_path / "bad.json"
+    bad.write_text("[]", encoding="utf-8")
+    for loader in (load_cyclonedx_sbom, load_npm_lockfile):
+        try:
+            loader(str(bad))
+        except ValueError as exc:
+            assert "root must be an object" in str(exc)
+        else:
+            raise AssertionError("expected malformed manifest to be rejected")

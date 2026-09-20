@@ -26,7 +26,7 @@ _LABEL_SCORES = {
 _AV = {"N": 1.0, "A": 0.75, "L": 0.5, "P": 0.25}
 _AC = {"L": 1.0, "H": 0.5}
 _PR = {"N": 1.0, "L": 0.65, "H": 0.3}
-_UI = {"N": 1.0, "R": 0.6}
+_UI = {"N": 1.0, "P": 0.7, "R": 0.6, "A": 0.4}
 _IMPACT = {"H": 1.0, "L": 0.5, "N": 0.0}
 
 _VECTOR_RE = re.compile(r"(?:^|/)([A-Z]{1,2}):([A-Za-z])")
@@ -63,9 +63,11 @@ def vector_heuristic_score(vector: str) -> float | None:
         ac = _AC[metrics["AC"]]
         pr = _PR[metrics["PR"]]
         ui = _UI[metrics["UI"]]
-        c = _IMPACT[metrics["C"]]
-        i = _IMPACT[metrics["I"]]
-        a = _IMPACT[metrics["A"]]
+        # CVSS v3 uses C/I/A; v4 renamed vulnerable-system impact metrics to
+        # VC/VI/VA. This is still a ranking heuristic, not official CVSS math.
+        c = _IMPACT[metrics["C"] if "C" in metrics else metrics["VC"]]
+        i = _IMPACT[metrics["I"] if "I" in metrics else metrics["VI"]]
+        a = _IMPACT[metrics["A"] if "A" in metrics else metrics["VA"]]
     except KeyError:
         return None
 
