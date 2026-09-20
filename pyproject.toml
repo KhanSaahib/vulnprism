@@ -29,6 +29,9 @@ classifiers = [
 Homepage = "https://github.com/KhanSaahib/vulnprism"
 Issues = "https://github.com/KhanSaahib/vulnprism/issues"
 Source = "https://github.com/KhanSaahib/vulnprism"
+Changelog = "https://github.com/KhanSaahib/vulnprism/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/KhanSaahib/vulnprism#readme"
+Security = "https://github.com/KhanSaahib/vulnprism/security/policy"
 
 [project.scripts]
 vulnprism = "vulnprism.__main__:main"
@@ -38,3 +41,8 @@ dev = ["build>=1.2", "pytest>=8"]
 
 [tool.setuptools.packages.find]
 include = ["vulnprism*"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
