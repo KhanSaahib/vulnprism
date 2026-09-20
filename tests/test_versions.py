@@ -12,6 +12,16 @@ def test_compare_prerelease_sorts_before_release():
     assert compare("1.0.0", "1.0.0-rc1") > 0
 
 
+def test_compare_ignores_semver_build_metadata():
+    assert compare("1.2.3+linux.x86", "1.2.3") == 0
+    assert compare("1.2.3+build.2", "1.2.3+build.1") == 0
+
+
+def test_fixed_boundary_includes_build_metadata_variant():
+    events = (("introduced", "0"), ("fixed", "1.2.3"))
+    assert in_range("1.2.3+vendor.1", events) is False
+
+
 def test_in_range_introduced_zero_and_fixed():
     events = (("introduced", "0"), ("fixed", "4.17.21"))
     assert in_range("4.17.19", events) is True

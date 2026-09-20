@@ -13,13 +13,16 @@ from __future__ import annotations
 
 import re
 
-_SPLIT_RE = re.compile(r"[.+]")
+_SPLIT_RE = re.compile(r"[.]")
 _NUMERIC_RE = re.compile(r"^\d+$")
 
 
 def _parse(version: str) -> tuple[tuple[int, ...], str]:
     """Split a version into a numeric core tuple and a trailing pre-release tag."""
     version = version.strip()
+    # SemVer build metadata does not participate in precedence. Ignoring it
+    # also avoids reporting 1.2.3+build as older than a 1.2.3 fixed boundary.
+    version, _, _build = version.partition("+")
     core = version
     pre = ""
     for sep in ("-",):

@@ -118,9 +118,10 @@ exactly which of the three applied - never hidden, per this project's
 ## Limitations (documented, not hidden)
 
 - **Version comparison is a generic heuristic**, not full semver or PEP 440:
-  it compares dotted numeric segments plus a single trailing pre-release tag.
-  Build metadata, PEP 440 epochs, and ecosystem-specific pre-release
-  ordering rules are not modeled. See `cve_matcher/versions.py`.
+  it compares dotted numeric segments plus a single trailing pre-release tag
+  and correctly ignores SemVer build metadata. PEP 440 epochs and
+  ecosystem-specific pre-release ordering rules are not modeled. See
+  `cve_matcher/versions.py`.
 - **The CVSS vector heuristic is an approximation**, not an official CVSS
   base score - use it only to rank findings against each other, not as a
   substitute for a real CVSS calculator.
