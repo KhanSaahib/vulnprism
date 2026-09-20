@@ -22,6 +22,11 @@ def test_fixed_boundary_includes_build_metadata_variant():
     assert in_range("1.2.3+vendor.1", events) is False
 
 
+def test_prerelease_numeric_identifiers_use_numeric_order():
+    assert compare("1.0.0-rc2", "1.0.0-rc10") < 0
+    assert compare("1.0.0-alpha.1", "1.0.0-alpha.beta") < 0
+
+
 def test_in_range_introduced_zero_and_fixed():
     events = (("introduced", "0"), ("fixed", "4.17.21"))
     assert in_range("4.17.19", events) is True

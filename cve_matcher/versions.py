@@ -15,6 +15,7 @@ import re
 
 _SPLIT_RE = re.compile(r"[.]")
 _NUMERIC_RE = re.compile(r"^\d+$")
+_PRE_TOKEN_RE = re.compile(r"\d+|[A-Za-z]+")
 
 
 def _parse(version: str) -> tuple[tuple[int, ...], str]:
@@ -64,7 +65,23 @@ def compare(a: str, b: str) -> int:
         return 1
     if not b_pre:
         return -1
-    return -1 if a_pre < b_pre else 1
+
+    a_tokens = _PRE_TOKEN_RE.findall(a_pre)
+    b_tokens = _PRE_TOKEN_RE.findall(b_pre)
+    for left, right in zip(a_tokens, b_tokens):
+        if left == right:
+            continue
+        left_numeric = left.isdigit()
+        right_numeric = right.isdigit()
+        if left_numeric and right_numeric:
+            return -1 if int(left) < int(right) else 1
+        if left_numeric != right_numeric:
+            # SemVer precedence: numeric identifiers sort before non-numeric.
+            return -1 if left_numeric else 1
+        return -1 if left.casefold() < right.casefold() else 1
+    if len(a_tokens) == len(b_tokens):
+        return 0
+    return -1 if len(a_tokens) < len(b_tokens) else 1
 
 
 def in_range(target: str, events: tuple[tuple[str, str], ...]) -> bool:
